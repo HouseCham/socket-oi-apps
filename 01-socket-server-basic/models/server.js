@@ -9,7 +9,7 @@ class ChatServer {
         // Express app
         this.app = express();
         // Port
-        this.port = 3000;
+        this.port = process.env.PORT;
         // Http server
         this.server = http.createServer( this.app );
         // Socket server Config
