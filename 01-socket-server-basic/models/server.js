@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
 const path = require('path');
+const Socket = require('./socket');
 
 class ChatServer {
     constructor() {
@@ -21,13 +22,15 @@ class ChatServer {
     }
 
     configSockets() {
-        
+        new Socket(this.io);
     }
 
     // Method to initialize the server
     execute() {
         // Initialize the middlewares
         this.middlewares();
+        // Initialize the sockets
+        this.configSockets();
         // Initialize the server
         this.server.listen( this.port, () => {
             console.log('Server running on port: ', this.port);
