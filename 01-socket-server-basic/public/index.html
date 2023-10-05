@@ -54,10 +54,6 @@
 
         // Socket events
         socket.on('chat-message-server', (data) => {
-            // const li = document.createElement('li');
-            // li.classList.add('list-group-item');
-            // li.innerText = data.message;
-            // myMessages.appendChild(li);
             myMessages.innerHTML += `<li class="list-group-item">${data.message}</li>`;
         });
     </script>
