@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useSocket } from '../hooks/useSocket';
+import React, { useState, useContext } from 'react';
+import { SocketContext } from '../context/SocketContext';
 
 /**
  * Component to add a new band
@@ -7,8 +7,10 @@ import { useSocket } from '../hooks/useSocket';
 const AddBand = () => {
 
   const [bandName, setBandName] = useState('');
-  const { socket } = useSocket('http://localhost:8080');
-
+  const { socket } = useContext(SocketContext);
+  /**
+   * Function to handle add band button click
+   */
   const handleAddBand = () => {
     if (bandName.trim().length === 0) return;
     socket.emit('add-band', bandName);
@@ -35,6 +37,6 @@ const AddBand = () => {
       </form>
     </>
   )
-}
+};
 
-export default AddBand
+export default AddBand;
