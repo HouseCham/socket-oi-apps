@@ -1,54 +1,50 @@
 const BandList = require('./band-list');
 
-
+/**
+ * Class to build socket configuration
+ */
 class Sockets {
 
     constructor( io ) {
-
         this.io = io;
         this.bandList = new BandList();
-
         this.socketEvents();
     }
-
+    /**
+     * Function to manage different socket events
+     */
     socketEvents() {
-        // On connection
+        // On client connection
         this.io.on('connection', ( socket ) => {
+            // Emit to the client the list of bands
+            socket.emit('current-band-list', this.bandList.getBandList());
 
-            console.log('Cliente conectado');
-
-            // Emitir al cliente conectado, todas las bandas actuales
-            socket.emit( 'current-bands' , this.bandList.getBands() );
-
-            // votar por la banda
-            socket.on( 'votar-banda', ( id ) => {
-                this.bandList.increaseVotes( id );
-                this.io.emit( 'current-bands' , this.bandList.getBands() );
+            // Vote band
+            socket.on('vote-band', (id) => {
+                this.bandList.increaseVotes(id);
+                // Emit to all clients the updated list of bands
+                this.io.emit('current-band-list', this.bandList.getBandList());
             });
-
-            // Borrar banda
-            socket.on( 'borrar-banda', ( id ) => {
-                this.bandList.removeBand( id );
-                this.io.emit( 'current-bands' , this.bandList.getBands() );
+            // Delete band
+            socket.on('delete-band', (id) => {
+                this.bandList.removeBand(id);
+                // Emit to all clients the updated list of bands
+                this.io.emit('current-band-list', this.bandList.getBandList());
             });
-
-            // Cambiar nombre de la banda
-            socket.on( 'cambiar-nombre-banda', ({ id, nombre }) => {
-                this.bandList.changeName(id, nombre);
-                this.io.emit( 'current-bands' , this.bandList.getBands() );
+            // Change band name
+            socket.on('update-band-name', (id, name) => {
+                this.bandList.changeBandName(id, name);
+                // Emit to all clients the updated list of bands
+                this.io.emit('current-band-list', this.bandList.getBandList());
             });
-
-            // Crear una nueva banda
-            socket.on( 'crear-banda', ({ nombre }) => {
-                this.bandList.addBand( nombre );
-                this.io.emit( 'current-bands' , this.bandList.getBands() );
+            // Add band
+            socket.on('add-band', (name) => {
+                this.bandList.addBand(name);
+                // Emit to all clients the updated list of bands
+                this.io.emit('current-band-list', this.bandList.getBandList());
             });
-            
-        
         });
     }
-
-
 }
 
 

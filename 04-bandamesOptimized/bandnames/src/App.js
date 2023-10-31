@@ -1,109 +1,114 @@
-import React, { useEffect, useState } from 'react';
-import io from 'socket.io-client';
 
+import React, { useEffect, useState } from "react";
+import AddBand from "./components/AddBand";
+import BandList from "./components/BandList";
+import io from "socket.io-client";
 
-import { BandAdd } from './componets/BandAdd';
-import { BandList } from './componets/BandList';
-
+/**
+ * Function to connect to Socket Server
+ * @returns {SocketIOClient.Socket} SocketIOClient.Socket
+ */
 const connectSocketServer = () => {
-  const socket = io.connect('http://localhost:8080');
-  return socket;
-}
+  return io.connect('http://localhost:8080', {
+    // to specify the type of transport/connection to the server
+    transports: ['websocket']
+  });
+};
 
-
+/**
+ * Main component
+ */
 function App() {
+  const [socket] = useState(connectSocketServer());
+  const [isOnline, setIsOnline] = useState(false);
+  const [bandList, setBandList] = useState([]);
 
-  const [ socket ] = useState( connectSocketServer() )
-  const [ online, setOnline ] = useState(false);
-  const [ bands, setBands ] = useState([]);
+  /**
+   * Function to increment the votes of a band
+   * @param {number} id 
+   */
+  const handleVoteBtnClick = (id) => {
+    socket.emit('vote-band', id);
+  };
+  /**
+   * Function to delete a band by its id
+   * @param {number} id 
+   */
+  const handleDeleteBand = (id) => {
+    socket.emit('delete-band', id);
+  };
+  /**
+   * Function to change the name of a band
+   * @param {string} newBandName 
+   * @param {number} id 
+   */
+  const handleBandNameChange = (id, newBandName) => {
+    socket.emit('update-band-name', id, newBandName);
+  };
+  /**
+   * Function to add a new band to the list
+   * @param {string} bandName 
+   */
+  const handleAddNewBand = (bandName) => {
+    socket.emit('add-band', bandName);
+  };
 
   useEffect(() => {
-    setOnline( socket.connected );
-  }, [ socket ])
+    setIsOnline(socket.connected);
+  }, [socket]);
 
-  useEffect( () => {
-
+  useEffect(() => {
     socket.on('connect', () => {
-      setOnline( true );
-    })
+      setIsOnline(true);
+    });
+  }, [socket]);
 
-  }, [ socket ])
-
-  useEffect( () => {
-
+  useEffect(() => {
     socket.on('disconnect', () => {
-      setOnline( false );
-    })
+      setIsOnline(false);
+    });
+  }, [socket]);
 
-  }, [ socket ])
-
-
-  useEffect( () => {
-
-    socket.on('current-bands', (bands) => {
-      setBands( bands );
-    })
-
-  }, [ socket ])
-
-
-  const votar = ( id ) => {
-    socket.emit( 'votar-banda', id );
-  }
-
-  const borrar = ( id ) => {
-    socket.emit( 'borrar-banda', id );
-  }
-
-  const cambiarNombre = ( id, nombre ) => {
-    socket.emit( 'cambiar-nombre-banda', { id, nombre });
-  }
-
-  // crearBanda( nombre )
-  const crearBanda = ( nombre ) => {
-    socket.emit( 'crear-banda', { nombre });
-  }
-  
-
+  useEffect(() => {
+    socket.on('current-band-list', (bands) => {
+      setBandList(bands);
+    });
+  }, [socket]);
 
   return (
     <div className="container">
-        
-        <div className="alert">
-          <p>
-            Service status: 
-            {
-              online
-                ? <span className="text-success"> Online</span>
-                : <span className="text-danger"> Offline</span>
-            }
-           
-          </p>
+      {/* Service Status */}
+      <div className="alert">
+        <p>
+          Service status:
+          {
+            isOnline
+              ? <span className="text-success"> ONLINE</span>
+              : <span className="text-danger"> OFFLINE</span>
+          }
+        </p>
+      </div>
+
+      <h1>BandNames</h1>
+      <hr />
+
+      <div className="row">
+        {/* Band Chart */}
+        <div className="col-8">
+          <BandList
+            data={bandList}
+            handleVoteBtnClick={handleVoteBtnClick}
+            handleDeleteBand={handleDeleteBand}
+            handleBandNameChange={handleBandNameChange}
+          />
         </div>
-
-
-        <h1>BandNames</h1>
-        <hr />
-
-        <div className="row">
-          <div className="col-8">
-            <BandList 
-              data={ bands }
-              votar={ votar }
-              borrar={ borrar }
-              cambiarNombre={ cambiarNombre }
-            />
-          </div>
-
-          <div className="col-4">
-            <BandAdd 
-              crearBanda={ crearBanda }
-            />
-          </div>
+        {/* Band Add */}
+        <div className="col-4">
+          <AddBand 
+            handleAddNewBand={handleAddNewBand}
+          />
         </div>
-
-
-
+      </div>
     </div>
   );
 }
