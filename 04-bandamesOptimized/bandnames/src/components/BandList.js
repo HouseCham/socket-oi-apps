@@ -27,7 +27,6 @@ const BandList = () => {
      * @param {string} bandName 
      */
     const handleBandOnBlur = (id, bandName) => {
-        // TODO: send information to websocket server
         handleBandNameChange(id, bandName);
     };
     /**

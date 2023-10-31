@@ -5,7 +5,6 @@ import { SocketContext } from '../context/SocketContext';
  * Component to add a new band
  */
 const AddBand = () => {
-
   const [bandName, setBandName] = useState('');
   const { socket } = useContext(SocketContext);
   /**
