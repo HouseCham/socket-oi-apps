@@ -2,27 +2,14 @@
 import React, { useEffect, useState } from "react";
 import AddBand from "./components/AddBand";
 import BandList from "./components/BandList";
-import io from "socket.io-client";
-
-/**
- * Function to connect to Socket Server
- * @returns {SocketIOClient.Socket} SocketIOClient.Socket
- */
-const connectSocketServer = () => {
-  return io.connect('http://localhost:8080', {
-    // to specify the type of transport/connection to the server
-    transports: ['websocket']
-  });
-};
+import { useSocket } from "./hooks/useSocket";
 
 /**
  * Main component
  */
 function App() {
-  const [socket] = useState(connectSocketServer());
-  const [isOnline, setIsOnline] = useState(false);
   const [bandList, setBandList] = useState([]);
-
+  const { socket, isOnline } = useSocket('http://localhost:8080');
   /**
    * Function to increment the votes of a band
    * @param {number} id 
@@ -45,29 +32,6 @@ function App() {
   const handleBandNameChange = (id, newBandName) => {
     socket.emit('update-band-name', id, newBandName);
   };
-  /**
-   * Function to add a new band to the list
-   * @param {string} bandName 
-   */
-  const handleAddNewBand = (bandName) => {
-    socket.emit('add-band', bandName);
-  };
-
-  useEffect(() => {
-    setIsOnline(socket.connected);
-  }, [socket]);
-
-  useEffect(() => {
-    socket.on('connect', () => {
-      setIsOnline(true);
-    });
-  }, [socket]);
-
-  useEffect(() => {
-    socket.on('disconnect', () => {
-      setIsOnline(false);
-    });
-  }, [socket]);
 
   useEffect(() => {
     socket.on('current-band-list', (bands) => {
@@ -104,9 +68,7 @@ function App() {
         </div>
         {/* Band Add */}
         <div className="col-4">
-          <AddBand 
-            handleAddNewBand={handleAddNewBand}
-          />
+          <AddBand />
         </div>
       </div>
     </div>

@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
+import { useSocket } from '../hooks/useSocket';
 
 /**
  * Component to add a new band
  */
-const AddBand = ({ handleAddNewBand }) => {
+const AddBand = () => {
 
   const [bandName, setBandName] = useState('');
+  const { socket } = useSocket('http://localhost:8080');
 
   const handleAddBand = () => {
     if (bandName.trim().length === 0) return;
-    handleAddNewBand(bandName);
+    socket.emit('add-band', bandName);
     setBandName('');
   };
   return (
