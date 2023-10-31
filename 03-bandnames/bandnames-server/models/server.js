@@ -6,7 +6,9 @@ const path     = require('path');
 const cors     = require('cors');
 
 const Sockets  = require('./sockets');
-
+/**
+ * Class to build the server
+ */
 class Server {
 
     constructor() {
